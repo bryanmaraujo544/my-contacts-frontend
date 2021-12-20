@@ -23,6 +23,7 @@ export const InputSearchContainer = styled.div`
     outline: 0;
     padding: 0 16px;
 
+
     &::placeholder {
       color: #BCBCBC;
     }
