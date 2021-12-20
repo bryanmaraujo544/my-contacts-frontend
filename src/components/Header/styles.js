@@ -25,7 +25,7 @@ export const InputSearchContainer = styled.div`
 
 
     &::placeholder {
-      color: #BCBCBC;
+      color: ${({ theme }) => theme.colors.gray[200]};
     }
   }
 
