@@ -1,6 +1,7 @@
 import styled, { css } from 'styled-components';
 
 export default styled.input`
+  appearance: none;
   width: 100%;
   background: #fff;
   border: none;

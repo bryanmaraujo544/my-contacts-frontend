@@ -42,13 +42,13 @@ export default function ContactForm({ buttonLabel }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log({
-      name, email, phone, category,
-    });
+    // console.log({
+    //   name, email, phone, category,
+    // });
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit} noValidate>
       <FormGroup error={getErrorMessageByFieldName('name')}>
         <Input
           placeholder="Nome"
@@ -65,6 +65,7 @@ export default function ContactForm({ buttonLabel }) {
           error={getErrorMessageByFieldName('email')}
           placeholder="E-mail"
           value={email}
+          type="email"
           onChange={(e) => handleEmailChange(e)}
         />
       </FormGroup>

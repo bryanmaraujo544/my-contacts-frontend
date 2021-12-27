@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
 export default styled.select`
+  appearance: none;
   width: 100%;
   background: #fff;
   border: none;
