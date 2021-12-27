@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import isEmailValid from '../../utils/isEmailValid';
 import useErrors from '../../hooks/useErrors';
+import formatPhone from '../../utils/formatPhone';
 
 import { Form, ButtonContainer } from './styles';
 
@@ -39,13 +40,19 @@ export default function ContactForm({ buttonLabel }) {
     }
   }
 
-  const handleSubmit = (e) => {
+  function handlePhoneChange(e) {
+    setPhone(formatPhone(e.target.value));
+  }
+
+  console.log(formatPhone('333'));
+
+  function handleSubmit(e) {
     e.preventDefault();
 
     // console.log({
     //   name, email, phone, category,
     // });
-  };
+  }
 
   return (
     <Form onSubmit={handleSubmit} noValidate>
@@ -66,7 +73,7 @@ export default function ContactForm({ buttonLabel }) {
           placeholder="E-mail"
           value={email}
           type="email"
-          onChange={(e) => handleEmailChange(e)}
+          onChange={handleEmailChange}
         />
       </FormGroup>
 
@@ -77,7 +84,8 @@ export default function ContactForm({ buttonLabel }) {
           error={getErrorMessageByFieldName('phone')}
           placeholder="Telefone"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={handlePhoneChange}
+          maxLength="15"
         />
       </FormGroup>
 
