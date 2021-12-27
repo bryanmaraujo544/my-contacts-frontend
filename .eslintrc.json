@@ -23,6 +23,7 @@
     "linebreak-style": 0,
     "react/function-component-definition": "off",
     "import/prefer-default-export": "off",
-    "react/jsx-no-bind": "off"
+    "react/jsx-no-bind": "off",
+    "no-unneeded-ternary": "off"
   }
 }
