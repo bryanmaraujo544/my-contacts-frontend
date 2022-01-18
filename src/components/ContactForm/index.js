@@ -23,7 +23,6 @@ export default function ContactForm({ buttonLabel }) {
   } = useErrors();
 
   const isFormValid = (name && errors.length === 0);
-  console.log({ isFormValid });
 
   function handleNameChange(e) {
     setName(e.target.value);
