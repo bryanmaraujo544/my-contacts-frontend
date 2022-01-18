@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Container, Header, ListHeader, Card, InputSearchContainer,
 } from './styles';
@@ -7,23 +7,36 @@ import {
 import arrow from '../../assets/images/icons/arrow.svg';
 import edit from '../../assets/images/icons/edit.svg';
 import trash from '../../assets/images/icons/trash.svg';
-// import Loader from '../../components/Loader';
+import Loader from '../../components/Loader';
 // import Modal from '../../components/Modal';
 
 import formatPhone from '../../utils/formatPhone';
+import delay from '../../utils/delay';
 
 export default function Home() {
   const [contacts, setContacts] = useState([]);
   const [orderBy, setOrderBy] = useState('asc');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  const filteredContacts = useMemo(() => contacts.filter((contact) => (
+    contact.name.toLowerCase().includes(searchTerm.toLocaleLowerCase())
+  )), [contacts, searchTerm]);
 
   useEffect(() => {
+    setIsLoading(true);
+
     fetch(`http://localhost:3001/contacts?orderBy=${orderBy}`)
       .then(async (response) => {
+        await delay(2000);
         const contactsJson = await response.json();
         setContacts(contactsJson);
       })
       .catch((error) => {
         console.log('error', error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, [orderBy]);
 
@@ -31,30 +44,39 @@ export default function Home() {
     setOrderBy((prevState) => (prevState === 'asc' ? 'desc' : 'asc'));
   }
 
+  function handleChangeSearchTerm(e) {
+    setSearchTerm(e.target.value);
+  }
+
   return (
     <Container>
       {/* <Modal isDanger /> */}
-      {/* <Loader /> */}
+      <Loader isLoading={isLoading} />
       <InputSearchContainer>
-        <input placeholder="Pesquisar contato" />
+        <input
+          value={searchTerm}
+          placeholder="Pesquisar contato"
+          onChange={handleChangeSearchTerm}
+        />
       </InputSearchContainer>
       <Header>
         <strong>
-          {contacts.length}
+          {filteredContacts.length}
           {' '}
-          {contacts.length === 1 ? 'contato' : 'contatos'}
+          {filteredContacts.length === 1 ? 'contato' : 'contatos'}
         </strong>
         <Link to="/new">Novo contato</Link>
       </Header>
+      {filteredContacts.length > 0 && (
+        <ListHeader orderBy={orderBy}>
+          <button type="button" onClick={handleToggleOrderBy}>
+            <span>Nome</span>
+            <img src={arrow} alt="top-arrowl" />
+          </button>
+        </ListHeader>
+      )}
 
-      <ListHeader orderBy={orderBy}>
-        <button type="button" onClick={handleToggleOrderBy}>
-          <span>Nome</span>
-          <img src={arrow} alt="top-arrowl" />
-        </button>
-      </ListHeader>
-
-      {contacts.map((contact) => (
+      {filteredContacts.map((contact) => (
         <Card>
           <div className="info">
             <div className="contact-name">
