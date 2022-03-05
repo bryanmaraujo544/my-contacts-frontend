@@ -24,18 +24,14 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  const filteredContacts = useMemo(
-    () =>
-      contacts.filter(
-        (contact) =>
-          contact.name.toLowerCase().includes(searchTerm.toLocaleLowerCase()),
-        // eslint-disable-next-line function-paren-newline
-      ),
-    [(contacts, searchTerm)],
-  );
-
-  console.log({ contacts });
-  console.log({ filteredContacts });
+  const filteredContacts = useMemo(() => {
+    const filtered = contacts.filter(
+      (contact) =>
+        contact.name.toLowerCase().includes(searchTerm.toLocaleLowerCase()),
+      // eslint-disable-next-line function-paren-newline
+    );
+    return filtered.length > 0 ? filtered : contacts;
+  }, [(contacts, searchTerm)]);
 
   useEffect(() => {
     async function loadContacts() {
