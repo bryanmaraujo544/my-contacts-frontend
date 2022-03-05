@@ -1,9 +1,15 @@
+/* eslint-disable react/jsx-one-expression-per-line */
 import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Container, Header, ListHeader, Card, InputSearchContainer,
+  Container,
+  Header,
+  ListHeader,
+  Card,
+  InputSearchContainer,
 } from './styles';
 
+import ContactsService from '../../services/ContactsService';
 import arrow from '../../assets/images/icons/arrow.svg';
 import edit from '../../assets/images/icons/edit.svg';
 import trash from '../../assets/images/icons/trash.svg';
@@ -11,7 +17,6 @@ import Loader from '../../components/Loader';
 // import Modal from '../../components/Modal';
 
 import formatPhone from '../../utils/formatPhone';
-import delay from '../../utils/delay';
 
 export default function Home() {
   const [contacts, setContacts] = useState([]);
@@ -19,25 +24,33 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  const filteredContacts = useMemo(() => contacts.filter((contact) => (
-    contact.name.toLowerCase().includes(searchTerm.toLocaleLowerCase())
-  )), [contacts, searchTerm]);
+  const filteredContacts = useMemo(
+    () =>
+      contacts.filter(
+        (contact) =>
+          contact.name.toLowerCase().includes(searchTerm.toLocaleLowerCase()),
+        // eslint-disable-next-line function-paren-newline
+      ),
+    [(contacts, searchTerm)],
+  );
+
+  console.log({ contacts });
+  console.log({ filteredContacts });
 
   useEffect(() => {
-    setIsLoading(true);
-
-    fetch(`http://localhost:3001/contacts?orderBy=${orderBy}`)
-      .then(async (response) => {
-        await delay(2000);
-        const contactsJson = await response.json();
-        setContacts(contactsJson);
-      })
-      .catch((error) => {
+    async function loadContacts() {
+      try {
+        setIsLoading(true);
+        const contactsList = await ContactsService.listContacts(orderBy);
+        setContacts(contactsList);
+      } catch (error) {
         console.log('error', error);
-      })
-      .finally(() => {
+      } finally {
         setIsLoading(false);
-      });
+      }
+    }
+
+    loadContacts();
   }, [orderBy]);
 
   function handleToggleOrderBy() {
@@ -61,8 +74,7 @@ export default function Home() {
       </InputSearchContainer>
       <Header>
         <strong>
-          {filteredContacts.length}
-          {' '}
+          {filteredContacts.length}{' '}
           {filteredContacts.length === 1 ? 'contato' : 'contatos'}
         </strong>
         <Link to="/new">Novo contato</Link>
@@ -84,9 +96,7 @@ export default function Home() {
               {contact.category_name && <small>{contact.category_name}</small>}
             </div>
             <span>{contact.email}</span>
-            <span>
-              {formatPhone(contact.phone)}
-            </span>
+            <span>{formatPhone(contact.phone)}</span>
           </div>
           <div className="actions">
             <Link to={`/edit/${contact.id}`}>
