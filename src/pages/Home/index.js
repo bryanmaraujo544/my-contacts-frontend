@@ -85,7 +85,7 @@ export default function Home() {
       )}
 
       {filteredContacts.map((contact) => (
-        <Card>
+        <Card key={contact}>
           <div className="info">
             <div className="contact-name">
               <strong>{contact.name}</strong>
