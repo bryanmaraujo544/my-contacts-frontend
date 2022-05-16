@@ -31,12 +31,13 @@ export default function Home() {
       // eslint-disable-next-line function-paren-newline
     );
     return filtered.length > 0 ? filtered : contacts;
-  }, [(contacts, searchTerm)]);
+  }, [contacts, searchTerm]);
 
   useEffect(() => {
     async function loadContacts() {
       try {
         setIsLoading(true);
+
         const contactsList = await ContactsService.listContacts(orderBy);
         setContacts(contactsList);
       } catch (error) {
