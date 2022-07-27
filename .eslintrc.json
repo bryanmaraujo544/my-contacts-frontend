@@ -21,6 +21,7 @@
     "react/jsx-no-bind": "off",
     "no-unneeded-ternary": "off",
     "class-methods-use-this": "off",
-    "implicit-arrow-linebreak": "off"
+    "implicit-arrow-linebreak": "off",
+    "no-empty": ["error", { "allowEmptyCatch": true }]
   }
 }

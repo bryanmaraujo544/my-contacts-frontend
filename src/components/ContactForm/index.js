@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import isEmailValid from '../../utils/isEmailValid';
 import useErrors from '../../hooks/useErrors';
 import formatPhone from '../../utils/formatPhone';
+import CategoriesService from '../../services/CategoriesService';
 
 import { Form, ButtonContainer } from './styles';
 
@@ -16,13 +17,28 @@ export default function ContactForm({ buttonLabel }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [category, setCategory] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
 
-  const {
-    setError, removeError, getErrorMessageByFieldName, errors,
-  } = useErrors();
+  const { setError, removeError, getErrorMessageByFieldName, errors } =
+    useErrors();
 
-  const isFormValid = (name && errors.length === 0);
+  const isFormValid = name && errors.length === 0;
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const categoriesList = await CategoriesService.listCategories();
+        setCategories(categoriesList);
+      } catch {
+      } finally {
+        setIsCategoriesLoading(false);
+      }
+    }
+
+    loadCategories();
+  }, []);
 
   function handleNameChange(e) {
     setName(e.target.value);
@@ -52,7 +68,10 @@ export default function ContactForm({ buttonLabel }) {
     e.preventDefault();
 
     console.log({
-      name, email, phone, category,
+      name,
+      email,
+      phone,
+      categoryId,
     });
   }
 
@@ -67,9 +86,7 @@ export default function ContactForm({ buttonLabel }) {
         />
       </FormGroup>
 
-      <FormGroup
-        error={getErrorMessageByFieldName('email')}
-      >
+      <FormGroup error={getErrorMessageByFieldName('email')}>
         <Input
           error={getErrorMessageByFieldName('email')}
           placeholder="E-mail"
@@ -79,9 +96,7 @@ export default function ContactForm({ buttonLabel }) {
         />
       </FormGroup>
 
-      <FormGroup
-        error={getErrorMessageByFieldName('phone')}
-      >
+      <FormGroup error={getErrorMessageByFieldName('phone')}>
         <Input
           error={getErrorMessageByFieldName('phone')}
           placeholder="Telefone"
@@ -91,14 +106,18 @@ export default function ContactForm({ buttonLabel }) {
         />
       </FormGroup>
 
-      <FormGroup>
+      <FormGroup isLoading={isCategoriesLoading}>
         <Select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+          disabled={isCategoriesLoading}
         >
-          <option value="">Categoria</option>
-          <option value="intagram">Instagram</option>
-          <option value="discord">Discord</option>
+          <option value="">Sem Categoria</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
         </Select>
       </FormGroup>
 
@@ -107,7 +126,6 @@ export default function ContactForm({ buttonLabel }) {
           {buttonLabel}
         </Button>
       </ButtonContainer>
-
     </Form>
   );
 }
