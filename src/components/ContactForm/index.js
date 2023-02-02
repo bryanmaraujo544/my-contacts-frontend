@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect, forwardRef } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 import isEmailValid from '../../utils/isEmailValid';
 import useErrors from '../../hooks/useErrors';
@@ -12,8 +12,11 @@ import FormGroup from '../FormGroup';
 import Input from '../Input';
 import Select from '../Select';
 import Button from '../Button';
+import Loader from '../Loader';
 
 const ContactForm = forwardRef(({ buttonLabel, onSubmit }, ref) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -26,17 +29,24 @@ const ContactForm = forwardRef(({ buttonLabel, onSubmit }, ref) => {
 
   const isFormValid = name && errors.length === 0;
 
-  const contactFormRef = ref;
-  useEffect(() => {
-    contactFormRef.current = {
-      setFields(fields) {
-        setName(fields.name);
-        setEmail(fields.email);
-        setPhone(fields.phone);
-        setCategoryId(fields.categoryId);
+  useImperativeHandle(
+    ref,
+    () => ({
+      setFields: (fields) => {
+        setName(fields.name ?? '');
+        setEmail(fields.email ?? '');
+        setPhone(formatPhone(fields.phone ?? ''));
+        setCategoryId(fields.categoryId ?? '');
       },
-    };
-  }, []);
+      resetFields: () => {
+        setName('');
+        setEmail('');
+        setPhone('');
+        setCategoryId('');
+      },
+    }),
+    [],
+  );
 
   useEffect(() => {
     async function loadCategories() {
@@ -78,6 +88,7 @@ const ContactForm = forwardRef(({ buttonLabel, onSubmit }, ref) => {
 
   function handleSubmit(e) {
     e.preventDefault();
+    setIsSubmitting(true);
 
     onSubmit({
       name,
@@ -85,6 +96,8 @@ const ContactForm = forwardRef(({ buttonLabel, onSubmit }, ref) => {
       phone,
       category_id: categoryId,
     });
+
+    setIsSubmitting(false);
   }
 
   return (
@@ -135,6 +148,7 @@ const ContactForm = forwardRef(({ buttonLabel, onSubmit }, ref) => {
 
       <ButtonContainer>
         <Button type="submit" disabled={!isFormValid}>
+          <Loader isLoading={isSubmitting} />
           {buttonLabel}
         </Button>
       </ButtonContainer>

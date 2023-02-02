@@ -23,6 +23,17 @@ class ContactsService {
       },
     });
   }
+
+  updateContact(id, { name, email, phone, category_id }) {
+    return this.httpClient.put(`/contacts/${id}`, {
+      body: {
+        name,
+        email,
+        phone,
+        category_id,
+      },
+    });
+  }
 }
 
 export default new ContactsService();
