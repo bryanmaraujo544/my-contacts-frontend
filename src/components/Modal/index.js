@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
-import { Overlay, ModalContainer, Footer } from './styles';
+import { ModalContainer, Footer, Overlay } from './styles';
 import Button from '../Button';
+import ReactPortal from '../ReactPortal';
 
 export default function Modal({
   isDanger,
@@ -18,38 +18,35 @@ export default function Modal({
     return null;
   }
 
-  return ReactDOM.createPortal(
-    <Overlay>
-      <ModalContainer isDanger={isDanger}>
-        <h1>{title}</h1>
-        <div className="modal-body">{children}</div>
+  return (
+    <ReactPortal containerId="modal-root">
+      <Overlay>
+        <ModalContainer isDanger={isDanger}>
+          <h1>{title}</h1>
+          <div className="modal-body">{children}</div>
 
-        <Footer>
-          <button
-            type="button"
-            disabled
-            className="cancel-btn"
-            onClick={onCancel}
-          >
-            {cancelLabel}
-          </button>
-          <Button
-            type="button"
-            isDanger={isDanger}
-            onClick={onConfirm}
-            isLoading={isLoading}
-          >
-            {confirmLabel}
-          </Button>
-        </Footer>
-      </ModalContainer>
-    </Overlay>,
-    document.getElementById('modal-root'),
+          <Footer>
+            <button type="button" className="cancel-btn" onClick={onCancel}>
+              {cancelLabel}
+            </button>
+            <Button
+              type="button"
+              isDanger={isDanger}
+              onClick={onConfirm}
+              isLoading={isLoading}
+            >
+              {confirmLabel}
+            </Button>
+          </Footer>
+        </ModalContainer>
+      </Overlay>
+    </ReactPortal>
   );
 }
 
 Modal.propTypes = {
   isDanger: PropTypes.bool,
+  visible: PropTypes.bool,
   title: PropTypes.string,
   isLoading: PropTypes.bool,
   children: PropTypes.node.isRequired,
@@ -63,5 +60,7 @@ Modal.defaultProps = {
   isDanger: false,
   cancelLabel: 'Cancelar',
   confirmLabel: 'Confirmar',
+  title: 'Modal',
   isLoading: false,
+  visible: false,
 };
