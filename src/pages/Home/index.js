@@ -15,7 +15,7 @@ import {
 } from './styles';
 
 import Button from '../../components/Button';
-
+import Modal from '../../components/Modal';
 import ContactsService from '../../services/ContactsService';
 import arrow from '../../assets/images/icons/arrow.svg';
 import edit from '../../assets/images/icons/edit.svg';
@@ -24,6 +24,7 @@ import sad from '../../assets/images/sad.svg';
 import Loader from '../../components/Loader';
 import emptyBox from '../../assets/images/icons/empty-box.svg';
 import magnifierQuestion from '../../assets/images/icons/magnifier-question.svg';
+import toast from '../../utils/toast';
 
 import formatPhone from '../../utils/formatPhone';
 
@@ -33,11 +34,14 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [contactBeingDeleted, setContactBeingDeleted] = useState(null);
+  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
 
   const filteredContacts = useMemo(() => {
     const filtered = contacts.filter(
       (contact) =>
-        contact.name.toLowerCase().includes(searchTerm.toLocaleLowerCase()),
+        contact.name.toLowerCase()?.includes(searchTerm.toLocaleLowerCase()),
       // eslint-disable-next-line function-paren-newline
     );
     return filtered;
@@ -76,10 +80,55 @@ export default function Home() {
     loadContacts();
   }
 
+  function handleDeleteContact(contact) {
+    setContactBeingDeleted(contact);
+    setIsDeleteModalVisible(true);
+  }
+
+  function handleCloseDeleteModal() {
+    setIsDeleteModalVisible(false);
+  }
+
+  async function handleConfirmDeleteContact() {
+    try {
+      setIsLoadingDelete(true);
+      await ContactsService.deleteContact(contactBeingDeleted.id);
+      setContacts((prev) =>
+        prev.filter((contact) => contact.id !== contactBeingDeleted.id),
+      );
+
+      toast({
+        type: 'success',
+        text: 'Contato deletado com sucesso.',
+      });
+      handleCloseDeleteModal();
+      setContactBeingDeleted(null);
+    } catch (err) {
+      console.log(err);
+      toast({
+        type: 'danger',
+        text: 'Ocorreu um erro ao deletar o contato',
+      });
+    } finally {
+      setIsLoadingDelete(false);
+    }
+  }
+
   return (
     <Container>
       {/* <Modal isDanger /> */}
       <Loader isLoading={isLoading} />
+      <Modal
+        isDanger
+        visible={isDeleteModalVisible}
+        isLoading={isLoadingDelete}
+        title={`Tem certeza que deseja remover o contato ${contactBeingDeleted?.name}`}
+        confirmLabel="Deletar"
+        onCancel={() => handleCloseDeleteModal()}
+        onConfirm={() => handleConfirmDeleteContact()}
+      >
+        <p>Esta ação não poderá ser desfeita!</p>
+      </Modal>
 
       {contacts.length > 0 && (
         <InputSearchContainer>
@@ -151,7 +200,7 @@ export default function Home() {
           )}
 
           {filteredContacts.map((contact) => (
-            <Card key={contact}>
+            <Card key={contact.id}>
               <div className="info">
                 <div className="contact-name">
                   <strong>{contact.name}</strong>
@@ -166,7 +215,10 @@ export default function Home() {
                 <Link to={`/edit/${contact.id}`}>
                   <img src={edit} alt="Edit" />
                 </Link>
-                <button type="button">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteContact(contact)}
+                >
                   <img src={trash} alt="Delete" />
                 </button>
               </div>
